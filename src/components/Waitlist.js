@@ -2,45 +2,49 @@ import React, { useState } from 'react';
 
 const Waitlist = ({ userEmail }) => {
     const [mensaje, setMensaje] = useState('');
+    const [error, setError] = useState(false);
 
-    const handleJoin = async () => {
-        try {
-            // Hacemos la petición a tu segundo microservicio en el puerto 8083
-            const response = await fetch('http://localhost:8083/api/waitlist/unirse', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    emailUsuario: userEmail || 'usuario@prueba.com', // Usará el email que le pasemos o uno de prueba
-                    asignatura: 'Programación Fullstack'
-                })
-            });
+    const unirseALista = () => {
+        const nuevaEntrada = {
+            email: userEmail,
+            estado: 'Pendiente'
+        };
 
-            if (response.ok) {
+        fetch('http://localhost:8083/api/waitlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevaEntrada)
+        })
+        .then(res => {
+            if (res.ok) {
                 setMensaje('¡Te has unido a la lista de espera con éxito!');
+                setError(false);
             } else {
-                setMensaje('Hubo un problema al registrarte.');
+                setMensaje('Error al unirse a la lista.');
+                setError(true);
             }
-        } catch (error) {
-            setMensaje('Error de conexión con el servidor Waitlist (Puerto 8083).');
-        }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            setMensaje('Error de conexión con el servidor.');
+            setError(true);
+        });
     };
 
     return (
-        <div style={{ textAlign: 'center', marginTop: '50px', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', maxWidth: '400px', margin: '50px auto' }}>
-            <h2>Panel de Alumno</h2>
-            <p>Bienvenido a la plataforma.</p>
-            <p>Asignatura: <strong>Programación Fullstack</strong></p>
+        <div style={{ padding: '30px', border: '1px solid #ccc', borderRadius: '10px', textAlign: 'center', backgroundColor: 'white', maxWidth: '400px' }}>
+            <h2>Panel de Pacientes</h2>
+            <p>Bienvenido a la plataforma RedNorte.</p>
             
             <button 
-                onClick={handleJoin}
-                style={{ padding: '10px 20px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px' }}
+                onClick={unirseALista} 
+                style={{ backgroundColor: '#27ae60', color: 'white', padding: '12px 25px', border: 'none', borderRadius: '5px', fontSize: '16px', cursor: 'pointer', fontWeight: 'bold', marginTop: '20px' }}
             >
                 Unirse a la Lista de Espera
             </button>
 
-            {/* Este mensaje aparecerá en verde si es éxito o rojo si hay error */}
             {mensaje && (
-                <p style={{ marginTop: '20px', fontWeight: 'bold', color: mensaje.includes('éxito') ? 'green' : 'red' }}>
+                <p style={{ marginTop: '20px', fontWeight: 'bold', color: error ? '#e74c3c' : '#27ae60' }}>
                     {mensaje}
                 </p>
             )}

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Fíjate que aquí arriba ahora recibe las instrucciones desde App.js
 const Login = ({ onLoginExitoso, irARegistro }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -22,11 +21,14 @@ const Login = ({ onLoginExitoso, irARegistro }) => {
             if (text.includes('Login exitoso')) {
                 setMensaje(text); // Mostramos el mensaje verde
                 
-                // --- AQUÍ ESTÁ LA MAGIA ---
-                // Le damos al usuario 1.5 segundos para leer el mensaje verde
-                // y luego le avisamos a App.js que nos cambie al Panel del Alumno
+                // --- MAGIA DE REDIRECCIÓN POR ROL ---
                 setTimeout(() => {
-                    onLoginExitoso(email); 
+                    // Diferenciamos si es el admin que inyectamos o un usuario normal
+                    if (email === 'admin@gmail.com') {
+                        onLoginExitoso(email, 'ADMIN'); // Avisamos a App.js que entró el ADMIN
+                    } else {
+                        onLoginExitoso(email, 'USER');  // Avisamos a App.js que entró un USER normal
+                    }
                 }, 1500); 
                 
             } else {
@@ -73,7 +75,6 @@ const Login = ({ onLoginExitoso, irARegistro }) => {
             )}
 
             <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                {/* Este botón ahora llama a la función para cambiar a la vista de Registro */}
                 <button 
                     onClick={irARegistro}
                     style={{ padding: '8px 15px', backgroundColor: 'transparent', border: '1px solid #ccc', cursor: 'pointer' }}
