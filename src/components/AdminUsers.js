@@ -2,22 +2,36 @@ import React, { useState, useEffect } from 'react';
 
 const AdminUsers = ({ trigger }) => {
     const [usuarios, setUsuarios] = useState([]);
+    const [listaEspecialidades, setListaEspecialidades] = useState([]); 
     const [editando, setEditando] = useState(null); 
-    // Añadimos rol y especialidad al formulario
     const [formEdit, setFormEdit] = useState({ email: '', nombre: '', rut: '', password: '', rol: 'PACIENTE', especialidad: 'NINGUNA' });
     const [error, setError] = useState('');
 
     const cargarUsuarios = () => {
         fetch('http://localhost:8082/api/auth/users')
             .then(res => res.json())
-            .then(data => setUsuarios(data.filter(u => u.rol !== 'ADMIN')));
+            .then(data => setUsuarios(data));
     };
 
-    useEffect(() => { cargarUsuarios(); }, [trigger]);
+    const fetchEspecialidades = async () => {
+        try {
+            const response = await fetch('http://localhost:8082/api/auth/especialidades');
+            if (response.ok) {
+                const data = await response.json();
+                setListaEspecialidades(data);
+            }
+        } catch (error) {
+            console.error("Error al cargar especialidades:", error);
+        }
+    };
+
+    useEffect(() => { 
+        cargarUsuarios(); 
+        fetchEspecialidades();
+    }, [trigger]);
 
     const iniciarEdicion = (u) => {
         setEditando(u.email);
-        // Cargamos los datos actuales del usuario en el formulario, incluyendo su rol
         setFormEdit({ 
             email: u.email, 
             nombre: u.nombre || '', 
@@ -103,17 +117,24 @@ const AdminUsers = ({ trigger }) => {
                                                 onChange={(e) => setFormEdit({...formEdit, especialidad: e.target.value})}
                                                 style={{width: '100%', padding: '5px'}}
                                             >
-                                                <option value="NINGUNA">Sin Asignar</option>
-                                                <option value="MEDICINA_GENERAL">Medicina General</option>
-                                                <option value="PEDIATRIA">Pediatría</option>
-                                                <option value="CARDIOLOGIA">Cardiología</option>
+                                                {listaEspecialidades.map((esp) => (
+                                                    <option key={esp} value={esp}>
+                                                        {esp === 'NINGUNA' ? 'Sin Asignar' : esp.replace(/_/g, ' ')}
+                                                    </option>
+                                                ))}
                                             </select>
                                         )}
                                     </>
                                 ) : (
                                     <>
                                         <span style={{fontWeight: 'bold', color: u.rol === 'DOCTOR' ? '#2980b9' : '#27ae60'}}>{u.rol}</span>
-                                        {u.rol === 'DOCTOR' && <div><small style={{color: '#7f8c8d'}}>{(u.especialidad || 'NINGUNA').replace('_', ' ')}</small></div>}
+                                        {u.rol === 'DOCTOR' && (
+                                            <div>
+                                                <small style={{color: '#7f8c8d'}}>
+                                                    {u.especialidad === 'NINGUNA' ? 'Sin Asignar' : (u.especialidad || 'NINGUNA').replace(/_/g, ' ')}
+                                                </small>
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </td>
