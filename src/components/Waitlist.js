@@ -20,7 +20,6 @@ const Waitlist = ({ userEmail }) => {
 
         const token = localStorage.getItem('token');
 
-        // Pasamos por el Gateway (8082) en lugar del puerto directo
         fetch('http://localhost:8082/api/waitlist/unirse', {
             method: 'POST',
             headers: { 
@@ -35,6 +34,10 @@ const Waitlist = ({ userEmail }) => {
                 setError(false);
             } else if (res.status === 401) {
                 setMensaje('Error de seguridad: Tu sesión expiró o no es válida.');
+                setError(true);
+            // 👇 AQUÍ ESTÁ LA NUEVA VALIDACIÓN PARA EL 409 👇
+            } else if (res.status === 409) {
+                setMensaje('Ya te encuentras en la lista de espera para esta especialidad.');
                 setError(true);
             } else {
                 setMensaje('Error al unirse a la lista.');
