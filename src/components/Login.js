@@ -16,14 +16,17 @@ const Login = ({ onLoginExitoso, irARegistro }) => {
             if (response.ok) {
                 const data = await response.json();
 
+                // Guardamos los datos en localStorage
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('rol', data.rol);
                 localStorage.setItem('especialidad', data.especialidad);
+                localStorage.setItem('usuarioId', data.id); // <--- NUEVO: Guardamos el ID del usuario
 
                 setMensaje('Login exitoso');
 
                 setTimeout(() => {
-                    onLoginExitoso(email, data.rol, data.especialidad);
+                    // <--- NUEVO: Pasamos data.id como cuarto parámetro
+                    onLoginExitoso(email, data.rol, data.especialidad, data.id); 
                 }, 1500);
             } else {
                 setMensaje('Correo o contraseña incorrectos.');
