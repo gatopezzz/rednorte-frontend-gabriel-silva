@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const Registro = ({ irALogin }) => {
     const [nombre, setNombre] = useState('');
+    const [edad, setEdad] = useState('');
     const [rut, setRut] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -11,7 +12,7 @@ const Registro = ({ irALogin }) => {
     const manejarCambioRut = (e) => {
         let valor = e.target.value;
         let rutLimpio = valor.replace(/[^0-9kK]/g, '').toUpperCase();
-        
+
         if (rutLimpio.length === 0) {
             setRut('');
             return;
@@ -29,12 +30,17 @@ const Registro = ({ irALogin }) => {
     };
 
     const validarFormulario = () => {
-        setError(''); 
+        setError('');
 
         if (nombre.trim().length < 3) {
             return "El nombre debe tener al menos 3 caracteres.";
         }
-        
+
+        if (!edad || edad <= 0) {
+            setMensaje('Por favor, ingresa una edad válida.');
+            return;
+        }
+
         const rutSinFormato = rut.replace(/[^0-9kK]/g, '');
         if (rutSinFormato.length < 8) {
             return "El RUT ingresado es demasiado corto.";
@@ -49,7 +55,7 @@ const Registro = ({ irALogin }) => {
             return "La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.";
         }
 
-        return null; 
+        return null;
     };
 
     const handleRegistro = async () => {
@@ -65,15 +71,15 @@ const Registro = ({ irALogin }) => {
             const response = await fetch('http://localhost:8082/api/auth/registro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, rut: rutParaBD, email, password })
+                body: JSON.stringify({ nombre, edad: parseInt(edad, 10), rut: rutParaBD, email, password })
             });
 
             if (response.ok) {
                 setMensaje('✅ Cuenta creada exitosamente. Redirigiendo al inicio de sesión...');
                 setError('');
-                
-                setTimeout(() => { 
-                    irALogin(); 
+
+                setTimeout(() => {
+                    irALogin();
                 }, 1500);
 
             } else {
@@ -87,35 +93,42 @@ const Registro = ({ irALogin }) => {
     return (
         <div style={{ textAlign: 'center', marginTop: '30px', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', maxWidth: '400px' }}>
             <h2>Crear Cuenta - RedNorte</h2>
-            
+
             <div style={{ marginBottom: '15px' }}>
-                <input 
-                    type="text" 
-                    placeholder="Nombre completo" 
-                    value={nombre} 
-                    onChange={(e) => setNombre(e.target.value)} 
+                <input
+                    type="text"
+                    placeholder="Nombre completo"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
                     style={{ padding: '10px', width: '90%', marginBottom: '10px' }}
                 />
-                <input 
-                    type="text" 
-                    placeholder="RUT (ej: 123456789)" 
-                    value={rut} 
-                    onChange={manejarCambioRut} 
-                    maxLength={12} 
+                <input
+                    type="text"
+                    placeholder="Edad"
+                    value={edad}
+                    onChange={(e) => setEdad(e.target.value)}
                     style={{ padding: '10px', width: '90%', marginBottom: '10px' }}
                 />
-                <input 
-                    type="email" 
-                    placeholder="Correo electrónico" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
+                <input
+                    type="text"
+                    placeholder="RUT (ej: 123456789)"
+                    value={rut}
+                    onChange={manejarCambioRut}
+                    maxLength={12}
                     style={{ padding: '10px', width: '90%', marginBottom: '10px' }}
                 />
-                <input 
-                    type="password" 
-                    placeholder="Contraseña" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
+                <input
+                    type="email"
+                    placeholder="Correo electrónico"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ padding: '10px', width: '90%', marginBottom: '10px' }}
+                />
+                <input
+                    type="password"
+                    placeholder="Contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     style={{ padding: '10px', width: '90%' }}
                 />
                 <small style={{ display: 'block', textAlign: 'left', marginLeft: '5%', color: '#7f8c8d', marginTop: '5px' }}>
@@ -123,7 +136,7 @@ const Registro = ({ irALogin }) => {
                 </small>
             </div>
 
-            <button 
+            <button
                 onClick={handleRegistro}
                 style={{ padding: '10px 20px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '95%', fontWeight: 'bold' }}
             >
@@ -134,7 +147,7 @@ const Registro = ({ irALogin }) => {
             {mensaje && <p style={{ color: '#27ae60', fontWeight: 'bold', marginTop: '15px' }}>{mensaje}</p>}
 
             <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                <button 
+                <button
                     onClick={irALogin}
                     style={{ padding: '8px 15px', backgroundColor: 'transparent', border: '1px solid #ccc', cursor: 'pointer' }}
                 >

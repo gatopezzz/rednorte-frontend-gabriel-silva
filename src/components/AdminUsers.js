@@ -4,7 +4,7 @@ const AdminUsers = ({ trigger }) => {
     const [usuarios, setUsuarios] = useState([]);
     const [listaEspecialidades, setListaEspecialidades] = useState([]); 
     const [editando, setEditando] = useState(null); 
-    const [formEdit, setFormEdit] = useState({ email: '', nombre: '', rut: '', password: '', rol: 'PACIENTE', especialidad: 'NINGUNA' });
+    const [formEdit, setFormEdit] = useState({ email: '', nombre: '', rut: '', password: '', rol: 'PACIENTE', especialidad: 'NINGUNA', edad: '' });
     const [error, setError] = useState('');
 
     const cargarUsuarios = () => {
@@ -38,16 +38,23 @@ const AdminUsers = ({ trigger }) => {
             rut: u.rut || '', 
             password: '',
             rol: u.rol,
-            especialidad: u.especialidad || 'NINGUNA'
+            especialidad: u.especialidad || 'NINGUNA',
+            edad: u.edad || ''
         });
         setError('');
     };
 
     const guardarEdicion = (originalEmail) => {
+        const bodyData = {
+            originalEmail,
+            ...formEdit,
+            edad: formEdit.edad ? parseInt(formEdit.edad, 10) : null
+        };
+
         fetch('http://localhost:8082/api/auth/users/update-admin', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ originalEmail, ...formEdit })
+            body: JSON.stringify(bodyData)
         }).then(async res => {
             if(res.ok) {
                 setEditando(null);
@@ -88,13 +95,14 @@ const AdminUsers = ({ trigger }) => {
                                         <input value={formEdit.rut} onChange={e => setFormEdit({...formEdit, rut: e.target.value})} placeholder="RUT" style={inputS} />
                                         <input value={formEdit.email} onChange={e => setFormEdit({...formEdit, email: e.target.value})} placeholder="Email" style={inputS} />
                                         <input value={formEdit.nombre} onChange={e => setFormEdit({...formEdit, nombre: e.target.value})} placeholder="Nombre" style={inputS} />
+                                        <input value={formEdit.edad} type="number" onChange={e => setFormEdit({...formEdit, edad: e.target.value})} placeholder="Edad" style={inputS} min="1" max="120" />
                                         <input value={formEdit.password} type="password" onChange={e => setFormEdit({...formEdit, password: e.target.value})} placeholder="Nueva Clave (Opcional)" style={inputS} />
                                     </div>
                                 ) : (
                                     <>
                                         <small style={{color: '#7f8c8d'}}>{u.rut || 'SIN RUT'}</small><br/>
                                         <strong>{u.email}</strong><br/>
-                                        <span>{u.nombre}</span>
+                                        <span>{u.nombre} {u.edad ? `(${u.edad} años)` : ''}</span>
                                     </>
                                 )}
                             </td>
